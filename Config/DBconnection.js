@@ -5,6 +5,7 @@ require("dotenv").config({
 });
 
 const uri = process.env.DATABASE;
+mongoose.set("strictQuery", false);
 mongoose
   .connect(uri)
   .then(() => {
