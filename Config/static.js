@@ -1,0 +1,1 @@
+exports.auth = "VANSHU12";
