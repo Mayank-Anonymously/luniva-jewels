@@ -1,0 +1,6 @@
+{
+  "version": 1,
+  "name": "asfiya-art-shop",
+  "builds": [{ "src": "server.js", "use": "@vercel/node" }],
+  "routes": [{ "src": "/(.*)", "dest": "/server.js" }]
+}
