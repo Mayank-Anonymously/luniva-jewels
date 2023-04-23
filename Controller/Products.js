@@ -25,7 +25,6 @@ const AddProduct = async (req, res) => {
     inStock,
   });
 
-  console.log(newProduct);
   try {
     const saveNewProduct = await newProduct.save();
     if (saveNewProduct) {

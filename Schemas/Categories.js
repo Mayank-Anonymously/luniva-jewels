@@ -2,25 +2,28 @@ const mongoose = require("mongoose");
 const autoIncrement = require("mongoose-auto-increment");
 const mongooseSerial = require("mongoose-serial");
 
-const CategoriesSchema = new mongoose.Schema({
-  CategoryID: String,
-  CategoryName: String,
-  CategoryDescription: String,
-  // SubCategory: [
-  //   {
-  //     subCatId: String,
-  //     subCategoryName: String,
-  //     subSubCategory: [
-  //       {
-  //         id: String,
-  //         name: String,
-  //       },
-  //     ],
-  //   },
-  // ],
-
-  SubCategory: [],
-});
+const CategoriesSchema = new mongoose.Schema(
+  {
+    CategoryID: String,
+    CategoryName: String,
+    CategoryDescription: String,
+    // SubCategory: [
+    //   {
+    //     subCatId: String,
+    //     subCategoryName: String,
+    //     subSubCategory: [
+    //       {
+    //         id: String,
+    //         name: String,
+    //       },
+    //     ],
+    //   },
+    // ],
+    SubCategory: [],
+    catImage: String,
+  },
+  { timestamps: true }
+);
 autoIncrement.initialize(mongoose.connection);
 CategoriesSchema.plugin(mongooseSerial, {
   field: "CategoryID",

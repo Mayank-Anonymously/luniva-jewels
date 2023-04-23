@@ -6,7 +6,9 @@ const AddCategory = async (req, res) => {
     CategoryName,
     CategoryDescription,
     SubCategory,
+    catImage: req.file.filename,
   });
+
   try {
     const saveNewCategory = await newCategory.save();
     if (saveNewCategory) {
