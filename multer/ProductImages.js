@@ -2,8 +2,8 @@ const multer = require("multer");
 var { existsSync, mkdirSync } = require("fs");
 
 const storage = multer.diskStorage({
-  destination: function (req, file, callback) {
-    callback(null, "images/");
+  destination: function (req, file, cb) {
+    cb(null, "./images");
   },
   filename: function (req, file, callback) {
     callback(null, file.originalname);

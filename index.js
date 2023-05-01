@@ -21,7 +21,6 @@ const corsOpts = {
   allowedHeaders: ["*"],
 };
 
-console.log("Election", path.join(__dirname, filePath));
 app.use(bodyParser.urlencoded({ extended: false }));
 
 // parse application/json
