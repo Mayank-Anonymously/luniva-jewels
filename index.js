@@ -10,6 +10,8 @@ require("dotenv").config({
 require("./Config/DBconnection");
 const PORT = process.env.PORT;
 const path = require("path");
+const filePath = path.join("/tmp/images");
+
 const CateRouter = require("./Routes/Category");
 const corsOpts = {
   origin: "*",
@@ -18,6 +20,7 @@ const corsOpts = {
 
   allowedHeaders: ["*"],
 };
+
 app.use(bodyParser.urlencoded({ extended: false }));
 
 // parse application/json
@@ -31,7 +34,10 @@ app.use("/", CateRouter);
 /* --------------------------------------------------------------------------------------------------- */
 
 /* IMAGE ENPOINT */
-app.use("/resources", express.static(path.join(__dirname, "images")));
+app.use(
+  "/resources",
+  express.static(path.join(path.resolve(), __dirname, "images"))
+);
 /* IMAGE ENPOINT */
 
 app.listen(PORT, () => {
