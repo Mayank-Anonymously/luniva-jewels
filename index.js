@@ -21,6 +21,7 @@ const corsOpts = {
   allowedHeaders: ["*"],
 };
 
+console.log("Election", path.join(__dirname, filePath));
 app.use(bodyParser.urlencoded({ extended: false }));
 
 // parse application/json
@@ -34,10 +35,7 @@ app.use("/", CateRouter);
 /* --------------------------------------------------------------------------------------------------- */
 
 /* IMAGE ENPOINT */
-app.use(
-  "/resources",
-  express.static(path.join(path.resolve(), __dirname, "images"))
-);
+app.use("/resources", express.static(path.join(__dirname, "images")));
 /* IMAGE ENPOINT */
 
 app.listen(PORT, () => {
