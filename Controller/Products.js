@@ -11,7 +11,10 @@ const AddProduct = async (req, res) => {
     productSku,
     productCode,
     inStock,
+    quantity,
+    stockQuantity,
   } = req.body;
+
   const newProduct = new ProductSchema({
     title,
     description,
@@ -23,28 +26,30 @@ const AddProduct = async (req, res) => {
     productSku,
     productCode,
     inStock,
+    quantity,
+    stockQuantity,
   });
 
-  try {
-    const saveNewProduct = await newProduct.save();
-    if (saveNewProduct) {
-      res.status(200).json({
-        baseResponse: { status: 1, messsage: "Product added successfully" },
-        response: saveNewProduct,
-      });
-    } else {
-      res.status(400).json({
-        baseResponse: { status: 0, messsage: "Bad Request" },
-        response: [],
-      });
-    }
-  } catch (err) {
-    console.log(err.message);
-    res.status(500).json({
-      baseResponse: { status: 0, messsage: err.message },
+  // try {
+  const saveNewProduct = await newProduct.save();
+  if (saveNewProduct) {
+    res.status(200).json({
+      baseResponse: { status: 1, messsage: "Product added successfully" },
+      response: saveNewProduct,
+    });
+  } else {
+    res.status(400).json({
+      baseResponse: { status: 0, messsage: "Bad Request" },
       response: [],
     });
   }
+  // } catch (err) {
+  //   console.log(err.message);
+  //   res.status(500).json({
+  //     baseResponse: { status: 0, messsage: err.message },
+  //     response: [],
+  //   });
+  // }
 };
 
 const GetAllProduct = async (req, res) => {
