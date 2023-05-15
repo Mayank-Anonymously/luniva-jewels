@@ -12,19 +12,21 @@ const PORT = process.env.PORT;
 const path = require("path");
 const CateRouter = require("./Routes/Category");
 const CartRoutes = require("./Routes/Cart");
+
+
 const corsOpts = {
   origin: "*",
-
   methods: ["GET", "POST", "PUT", "PATCH"],
-
   allowedHeaders: ["*"],
 };
 
-app.use(bodyParser.urlencoded({ extended: false }));
 
 // parse application/json
+
+app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(cors(corsOpts));
+
 /* API ENPOINTS */
 app.use("/", ProductRouter);
 app.use("/", CateRouter);
