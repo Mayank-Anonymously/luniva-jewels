@@ -1,80 +1,181 @@
-const CartSchema = require("../Schemas/Cart");
+const CartSchema = require('../Schemas/Cart');
 
+// ------------------ Add to Cart ------------------
 const AddToCart = async (req, res) => {
-  const {
-    productId,
-    title,
-    description,
-    price,
-    priceSale,
-    image,
-    categoryId,
-    categoryName,
-    productSku,
-    productCode,
-    inStock,
-    quantity,
-  } = req.body;
-  const NewItems = new CartSchema({
-    productId,
-    title,
-    description,
-    price,
-    priceSale,
-    image,
-    categoryId,
-    categoryName,
-    productSku,
-    productCode,
-    inStock,
-    quantity,
-  });
+	try {
+		const {
+			productId,
+			quantity = 1,
+			// userId,
+			title,
+			description,
+			price,
+			priceSale,
+			image,
+			categoryId,
+			categoryName,
+			productSku,
+			productCode,
+			inStock,
+			userId,
+		} = req.body;
 
-  if (productId) {
-    await NewItems.save();
-    res.status(200).json({
-      baseResponse: {
-        message: "Item Added Successfully",
-        status: 1,
-      },
-      response: NewItems,
-    });
-  } else {
-    res.status(500).json({
-      baseResponse: {
-        message: "Item Not Added",
-        status: 0,
-      },
-      response: [],
-    });
-  }
+		if (!productId || !userId) {
+			return res.status(400).json({
+				baseResponse: {
+					message: 'ProductId and UserId are required',
+					status: 0,
+				},
+				response: [],
+			});
+		}
+
+		// Check if item already exists in user's cart
+		const existingItem = await CartSchema.findOne({ productId });
+
+		if (existingItem) {
+			// Update quantity if already exists
+			existingItem.quantity =
+				parseInt(existingItem.quantity) + parseInt(quantity);
+			await existingItem.save();
+			return res.status(200).json({
+				baseResponse: { message: 'Quantity Updated Successfully', status: 1 },
+				response: existingItem,
+			});
+		}
+
+		// Create new cart item
+		const newItem = new CartSchema({
+			userId,
+			productId,
+			title,
+			description,
+			price,
+			priceSale,
+			image,
+			categoryId,
+			categoryName,
+			productSku,
+			productCode,
+			inStock,
+			quantity,
+		});
+
+		await newItem.save();
+		res.status(200).json({
+			baseResponse: { message: 'Item Added Successfully', status: 1 },
+			response: newItem,
+		});
+	} catch (error) {
+		console.error(error);
+		res.status(500).json({
+			baseResponse: { message: 'Error Adding Item', status: 0 },
+			response: [],
+		});
+	}
 };
+
+// ------------------ Get All Cart Items for a User ------------------
 const GetAllItems = async (req, res) => {
-  const GetAllCartItems = await CartSchema.find({});
+	try {
+		const { userId } = req.params;
 
-  if (GetAllCartItems !== null || GetAllCartItems.length !== 0) {
-    res.status(200).json({
-      baseResponse: {
-        message: "All Items Fetched Successfully",
-        status: 1,
-      },
-      response: GetAllCartItems,
-    });
-  } else {
-    res.status(500).json({
-      baseResponse: {
-        message: "Items Not Fetched Successfully ",
-        status: 0,
-      },
-      response: [],
-    });
-  }
+		if (!userId) {
+			return res.status(400).json({
+				baseResponse: { message: 'UserId is required', status: 0 },
+				response: [],
+			});
+		}
 
-  //   const GetAllItems = CartSchema.find({});
-  //   array.forEach((element) => {});
+		const cartItems = await CartSchema.find({ userId });
+
+		if (!cartItems || cartItems.length === 0) {
+			return res.status(200).json({
+				baseResponse: { message: 'Cart is empty', status: 1 },
+				response: [],
+			});
+		}
+
+		res.status(200).json({
+			baseResponse: { message: 'Cart Items Fetched Successfully', status: 1 },
+			response: cartItems,
+		});
+	} catch (error) {
+		console.error(error);
+		res.status(500).json({
+			baseResponse: { message: 'Error Fetching Cart Items', status: 0 },
+			response: [],
+		});
+	}
+};
+
+// ------------------ Remove Item from Cart ------------------
+const RemoveFromCart = async (req, res) => {
+	try {
+		const { productId, userId } = req.body;
+
+		if (!productId || !userId) {
+			return res.status(400).json({
+				baseResponse: {
+					message: 'ProductId and UserId are required',
+					status: 0,
+				},
+				response: [],
+			});
+		}
+
+		const deleted = await CartSchema.findOneAndDelete({ productId, userId });
+
+		if (!deleted) {
+			return res.status(404).json({
+				baseResponse: { message: 'Item not found in cart', status: 0 },
+				response: [],
+			});
+		}
+
+		res.status(200).json({
+			baseResponse: { message: 'Item Removed Successfully', status: 1 },
+			response: deleted,
+		});
+	} catch (error) {
+		console.error(error);
+		res.status(500).json({
+			baseResponse: { message: 'Error Removing Item', status: 0 },
+			response: [],
+		});
+	}
+};
+
+// ------------------ Clear Cart ------------------
+const ClearCart = async (req, res) => {
+	try {
+		const { userId } = req.body;
+
+		if (!userId) {
+			return res.status(400).json({
+				baseResponse: { message: 'UserId is required', status: 0 },
+				response: [],
+			});
+		}
+
+		await CartSchema.deleteMany({ userId });
+
+		res.status(200).json({
+			baseResponse: { message: 'Cart Cleared Successfully', status: 1 },
+			response: [],
+		});
+	} catch (error) {
+		console.error(error);
+		res.status(500).json({
+			baseResponse: { message: 'Error Clearing Cart', status: 0 },
+			response: [],
+		});
+	}
 };
 
 module.exports = {
-  AddToCart,
-  GetAllItems,
+	AddToCart,
+	GetAllItems,
+	RemoveFromCart,
+	ClearCart,
 };

@@ -1,25 +1,25 @@
-const http = require("http");
-const express = require("express");
+const express = require('express');
 const app = express();
-const cors = require("cors");
-const bodyParser = require("body-parser");
-const ProductRouter = require("./Routes/ProductRoute");
-require("dotenv").config({
-  path: "./applicationProperties.env",
+const cors = require('cors');
+const bodyParser = require('body-parser');
+const ProductRouter = require('./Routes/ProductRoute');
+require('dotenv').config({
+	path: './applicationProperties.env',
 });
-require("./Config/DBconnection");
-const PORT = process.env.PORT;
-const path = require("path");
-const CateRouter = require("./Routes/Category");
-const CartRoutes = require("./Routes/Cart");
-
+require('./Config/DBconnection');
+const PORT = process.env.PORT || 9000;
+const path = require('path');
+const CateRouter = require('./Routes/Category');
+const CartRoutes = require('./Routes/Cart');
+const { default: orouter } = require('./Routes/orderRouter');
+const { default: authrouter } = require('./Routes/authRouter');
+const prouter = require('./Routes/paymentRoute');
 
 const corsOpts = {
-  origin: "*",
-  methods: ["GET", "POST", "PUT", "PATCH"],
-  allowedHeaders: ["*"],
+	origin: '*',
+	methods: ['GET', 'POST', 'PUT', 'PATCH'],
+	allowedHeaders: ['*'],
 };
-
 
 // parse application/json
 
@@ -28,17 +28,21 @@ app.use(bodyParser.json());
 app.use(cors(corsOpts));
 
 /* API ENPOINTS */
-app.use("/", ProductRouter);
-app.use("/", CateRouter);
-app.use("/cart", CartRoutes);
+app.use('/product', ProductRouter);
+app.use('/', CateRouter);
+app.use('/cart', CartRoutes);
+app.use('/order', orouter);
+app.use('/auth', authrouter);
+app.use('/payment', prouter);
+
 /* API ENPOINTS */
 
 /* --------------------------------------------------------------------------------------------------- */
 
 /* IMAGE ENPOINT */
-app.use("/resources", express.static(path.join(__dirname, "images")));
+app.use('/resources', express.static(path.join(__dirname, 'images')));
 /* IMAGE ENPOINT */
 
 app.listen(PORT, () => {
-  console.log(`the port is ready to listen on port ${PORT}`);
+	console.log(`the port is ready to listen on port ${PORT}`);
 });
