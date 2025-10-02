@@ -47,7 +47,7 @@ const register = async (req, res) => {
 		const user = await User.create({
 			name,
 			email,
-			password: hashedPassword,
+			password,
 			otp,
 			otpExpiry,
 			isVerified: false,
@@ -108,22 +108,41 @@ const verifyOtp = async (req, res) => {
 
 // Login User
 const login = async (req, res) => {
+	console.log(req.body);
 	try {
-		const { email, password } = req.body;
+		let { email, password } = req.body;
 
+		// Trim any leading/trailing spaces from the password
+		password = password.trim();
+		console.log('Entered Password (Trimmed):', password); // Log the entered password after trimming
+
+		// Find the user by email
 		const user = await User.findOne({ email });
+
 		if (!user) return res.status(404).json({ message: 'User not found' });
 
-		// Check password
-		const isMatch = await bcrypt.compare(password, user.password);
-		if (!isMatch)
-			return res.status(401).json({ message: 'Invalid credentials' });
+		// Log the stored password hash from the database
+		console.log('Stored Hashed Password:', user.password);
 
-		// Generate JWT
+		// Check if the password matches the hashed password in the database
+		const isMatch = await user.matchPassword(password);
+
+		console.log('Password Match Result:', isMatch); // Log the result of the comparison
+
+		if (!isMatch) {
+			return res.status(401).json({ message: 'Invalid credentials' });
+		}
+
+		// Generate JWT token
 		const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: '7d' });
 
-		res.json({ message: 'Login successful', token, user });
+		res.json({
+			message: 'Login successful',
+			token,
+			user,
+		});
 	} catch (err) {
+		console.log('Login Error:', err);
 		res.status(500).json({ error: err.message });
 	}
 };
