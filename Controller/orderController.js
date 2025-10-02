@@ -56,14 +56,15 @@ export const getUserOrders = async (req, res) => {
 
 // Get single order by ID
 export const getOrderById = async (req, res) => {
-	try {
-		const { orderId } = req.params;
-		const order = await Order.findById(orderId).populate('items.product');
-		if (!order) return res.status(404).json({ message: 'Order not found' });
-		res.json(order);
-	} catch (err) {
-		res.status(500).json({ error: err.message });
-	}
+	// try {
+	const { orderId } = req.params;
+	const order = await Order.findOne({ orderId: orderId });
+
+	if (!order) return res.status(404).json({ message: 'Order not found' });
+	res.json(order);
+	// } catch (err) {
+	// 	res.status(500).json({ error: err.message });
+	// }
 };
 
 // Update order status (Admin only usually)
