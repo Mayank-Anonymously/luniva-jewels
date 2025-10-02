@@ -78,7 +78,7 @@ const GetProductByID = async (req, res) => {
 
 	try {
 		const GetProduct = await ProductSchema.findOne({
-			productId: ProductID,
+			_id: ProductID,
 		});
 		if (GetProduct) {
 			res.status(200).json({

@@ -27,21 +27,21 @@ const client = StandardCheckoutClient.getInstance(
 // -------------------
 exports.initiatePayment = async (req, res) => {
 	try {
-		const { userId, shippingAddress, billingAddress, paymentMethod } = req.body;
+		const {
+			userId,
+			shippingAddress,
+			billingAddress,
+			paymentMethod,
+			amount,
+			items,
+		} = req.body;
 
 		// Get user and populate cart with product details
-		const user = await User.findById(userId).populate('cart.product');
+		const user = await User.findById(userId);
 
 		if (!user || user.cart.length === 0) {
 			return res.status(400).json({ message: 'Cart is empty' });
 		}
-
-		// Build order items
-		const items = user.cart.map((item) => ({
-			product: item.product._id,
-			quantity: item.quantity,
-			price: item.product.price,
-		}));
 
 		// Calculate total
 		const total = items.reduce(
@@ -65,14 +65,13 @@ exports.initiatePayment = async (req, res) => {
 		user.cart = [];
 		await user.save();
 
-		const { amount } = req.body;
-		const merchantOrderId = '000001';
+		const merchantOrderId = order.orderId;
 
 		// Build payment request
 		const request = StandardCheckoutPayRequest.builder()
 			.merchantOrderId(merchantOrderId)
 			.amount(amount * 100) // ₹ → paise
-			.redirectUrl('https://www.merchant.com/redirect')
+			.redirectUrl(`http://localhost:9000/payment-status/${merchantOrderId}`)
 
 			.build();
 
@@ -85,5 +84,34 @@ exports.initiatePayment = async (req, res) => {
 	} catch (err) {
 		console.error('❌ Payment initiation failed:', err);
 		res.status(500).json({ error: 'Payment initiation failed' });
+	}
+};
+
+exports.checkPaymentStatus = async (req, res) => {
+	try {
+		const { merchantOrderId } = req.body;
+
+		if (!merchantOrderId) {
+			return res.status(400).json({ message: 'merchantOrderId is required' });
+		}
+
+		// Build status request
+		const statusRequest = StandardCheckoutStatusRequest.builder()
+			.merchantOrderId(merchantOrderId)
+			.build();
+
+		const statusResponse = await client.status(statusRequest);
+
+		// Update order status in DB
+		const order = await Order.findOne({ orderId: merchantOrderId });
+		if (order) {
+			order.status = statusResponse.status; // SUCCESS / FAILURE / PENDING
+			await order.save();
+		}
+
+		res.status(200).json(statusResponse);
+	} catch (err) {
+		console.error('❌ Payment status check failed:', err);
+		res.status(500).json({ error: 'Payment status check failed' });
 	}
 };

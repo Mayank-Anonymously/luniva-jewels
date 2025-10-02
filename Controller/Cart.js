@@ -1,12 +1,12 @@
 const CartSchema = require('../Schemas/Cart');
+const User = require('../Schemas/userSchema');
 
 // ------------------ Add to Cart ------------------
 const AddToCart = async (req, res) => {
 	try {
 		const {
-			productId,
+			_id,
 			quantity = 1,
-			// userId,
 			title,
 			description,
 			price,
@@ -20,7 +20,7 @@ const AddToCart = async (req, res) => {
 			userId,
 		} = req.body;
 
-		if (!productId || !userId) {
+		if (!_id || !userId) {
 			return res.status(400).json({
 				baseResponse: {
 					message: 'ProductId and UserId are required',
@@ -31,10 +31,10 @@ const AddToCart = async (req, res) => {
 		}
 
 		// Check if item already exists in user's cart
-		const existingItem = await CartSchema.findOne({ productId });
+		const existingItem = await CartSchema.findOne({ _id });
 
 		if (existingItem) {
-			// Update quantity if already exists
+			// Update quantity if already exists[]
 			existingItem.quantity =
 				parseInt(existingItem.quantity) + parseInt(quantity);
 			await existingItem.save();
@@ -47,7 +47,7 @@ const AddToCart = async (req, res) => {
 		// Create new cart item
 		const newItem = new CartSchema({
 			userId,
-			productId,
+			id: _id,
 			title,
 			description,
 			price,
@@ -61,6 +61,11 @@ const AddToCart = async (req, res) => {
 			quantity,
 		});
 
+		await User.findOneAndUpdate(
+			{ _id: userId },
+			{ $set: { cart: newItem } },
+			{ new: true, upsert: true }
+		);
 		await newItem.save();
 		res.status(200).json({
 			baseResponse: { message: 'Item Added Successfully', status: 1 },
@@ -112,9 +117,9 @@ const GetAllItems = async (req, res) => {
 // ------------------ Remove Item from Cart ------------------
 const RemoveFromCart = async (req, res) => {
 	try {
-		const { productId, userId } = req.body;
-
-		if (!productId || !userId) {
+		const { id, userId } = req.params;
+		console.log(req.params);
+		if (!id || !userId) {
 			return res.status(400).json({
 				baseResponse: {
 					message: 'ProductId and UserId are required',
@@ -124,7 +129,7 @@ const RemoveFromCart = async (req, res) => {
 			});
 		}
 
-		const deleted = await CartSchema.findOneAndDelete({ productId, userId });
+		const deleted = await CartSchema.findOneAndDelete({ id });
 
 		if (!deleted) {
 			return res.status(404).json({
@@ -149,7 +154,7 @@ const RemoveFromCart = async (req, res) => {
 // ------------------ Clear Cart ------------------
 const ClearCart = async (req, res) => {
 	try {
-		const { userId } = req.body;
+		const { userId } = req.params;
 
 		if (!userId) {
 			return res.status(400).json({

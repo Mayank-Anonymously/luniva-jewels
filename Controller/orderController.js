@@ -4,21 +4,15 @@ import User from '../Schemas/userSchema.js';
 // Place a new order
 export const placeOrder = async (req, res) => {
 	try {
-		const { userId, shippingAddress, billingAddress, paymentMethod } = req.body;
+		const { userId, shippingAddress, billingAddress, paymentMethod, items } =
+			req.body;
 
 		// Get user and populate cart with product details
-		const user = await User.findById(userId).populate('cart.product');
+		const user = await User.findById(userId);
 
 		if (!user || user.cart.length === 0) {
 			return res.status(400).json({ message: 'Cart is empty' });
 		}
-
-		// Build order items
-		const items = user.cart.map((item) => ({
-			product: item.product._id,
-			quantity: item.quantity,
-			price: item.product.price,
-		}));
 
 		// Calculate total
 		const total = items.reduce(

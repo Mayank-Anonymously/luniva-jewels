@@ -27,13 +27,7 @@ const userSchema = new mongoose.Schema(
 
 			default: 'user',
 		},
-		// Reference to Cart items
-		cart: [
-			{
-				type: mongoose.Schema.Types.ObjectId,
-				ref: 'Cart',
-			},
-		],
+		cart: [],
 		addresses: [
 			{
 				type: {

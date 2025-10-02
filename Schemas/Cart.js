@@ -3,7 +3,6 @@ const autoIncrement = require('mongoose-auto-increment');
 
 const CartSchema = new mongoose.Schema(
 	{
-		productId: String,
 		title: String,
 		description: String,
 		price: Number,
@@ -13,9 +12,10 @@ const CartSchema = new mongoose.Schema(
 		categoryName: String,
 		productSku: String,
 		productCode: String,
-		inStock: Boolean, 
+		inStock: Boolean,
 		quantity: String,
 		stockQuantity: String,
+		id: String,
 	},
 	{ timestamps: true }
 );

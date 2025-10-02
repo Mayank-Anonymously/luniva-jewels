@@ -18,7 +18,9 @@ const prouter = require('./Routes/paymentRoute');
 const corsOpts = {
 	origin: '*',
 	methods: ['GET', 'POST', 'PUT', 'PATCH'],
-	allowedHeaders: ['*'],
+	allowedHeaders: [
+		'* , https://www.lunivajewels.com , https://lunivajewels.com',
+	],
 };
 
 // parse application/json
