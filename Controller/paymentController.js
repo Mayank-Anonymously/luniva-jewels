@@ -4,6 +4,7 @@ const {
 	Env,
 	MetaInfo,
 	StandardCheckoutPayRequest,
+	StandardCheckoutStatusRequest,
 } = require('pg-sdk-node');
 const { default: OrderSchema } = require('../Schemas/OrderSchema');
 const User = require('../Schemas/userSchema');
@@ -61,8 +62,6 @@ exports.initiatePayment = async (req, res) => {
 
 		await order.save();
 
-		// Clear cart after placing order
-		user.cart = [];
 		await user.save();
 
 		const merchantOrderId = order.orderId;
@@ -71,7 +70,9 @@ exports.initiatePayment = async (req, res) => {
 		const request = StandardCheckoutPayRequest.builder()
 			.merchantOrderId(merchantOrderId)
 			.amount(amount * 100) // ₹ → paise
-			.redirectUrl(`http://localhost:9000/payment-status/${merchantOrderId}`)
+			.redirectUrl(
+				`http://localhost:3000/order/payment-status/${merchantOrderId}`
+			)
 
 			.build();
 
@@ -89,27 +90,30 @@ exports.initiatePayment = async (req, res) => {
 
 exports.checkPaymentStatus = async (req, res) => {
 	try {
-		const { merchantOrderId } = req.body;
+		const { merchantOrderId } = req.params;
 
 		if (!merchantOrderId) {
 			return res.status(400).json({ message: 'merchantOrderId is required' });
 		}
 
-		// Build status request
-		const statusRequest = StandardCheckoutStatusRequest.builder()
-			.merchantOrderId(merchantOrderId)
-			.build();
+		// ✅ Directly get order status using SDK
+		const statusResponse = await client.getOrderStatus(merchantOrderId);
 
-		const statusResponse = await client.status(statusRequest);
+		console.log('📦 PhonePe status response:', statusResponse);
 
-		// Update order status in DB
-		const order = await Order.findOne({ orderId: merchantOrderId });
+		// ✅ Update status in DB
+		const order = await OrderSchema.findOne({ orderId: merchantOrderId });
 		if (order) {
-			order.status = statusResponse.status; // SUCCESS / FAILURE / PENDING
+			order.status = statusResponse.state; // Usually: SUCCESS / FAILURE / PENDING
 			await order.save();
 		}
 
-		res.status(200).json(statusResponse);
+		// ✅ Send success response
+		res.status(200).json({
+			message: 'Payment status fetched successfully',
+			status: statusResponse.state,
+			raw: statusResponse,
+		});
 	} catch (err) {
 		console.error('❌ Payment status check failed:', err);
 		res.status(500).json({ error: 'Payment status check failed' });

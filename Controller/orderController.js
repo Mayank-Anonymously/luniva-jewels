@@ -32,8 +32,6 @@ export const placeOrder = async (req, res) => {
 
 		await order.save();
 
-		// Clear cart after placing order
-		user.cart = [];
 		await user.save();
 
 		res.status(201).json({
