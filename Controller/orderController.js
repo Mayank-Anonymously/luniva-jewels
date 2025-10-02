@@ -3,44 +3,44 @@ import User from '../Schemas/userSchema.js';
 
 // Place a new order
 export const placeOrder = async (req, res) => {
-	try {
-		const { userId, shippingAddress, billingAddress, paymentMethod, items } =
-			req.body;
+	// try {
+	const { userId, shippingAddress, billingAddress, paymentMethod, items } =
+		req.body;
+	console.log(userId);
+	// Get user and populate cart with product details
+	const user = await User.findById(userId);
 
-		// Get user and populate cart with product details
-		const user = await User.findById(userId);
-
-		if (!user || user.cart.length === 0) {
-			return res.status(400).json({ message: 'Cart is empty' });
-		}
-
-		// Calculate total
-		const total = items.reduce(
-			(acc, item) => acc + item.price * item.quantity,
-			0
-		);
-
-		// Create new order
-		const order = new Order({
-			user: userId,
-			items,
-			total,
-			shippingAddress,
-			billingAddress,
-			paymentMethod,
-		});
-
-		await order.save();
-
-		await user.save();
-
-		res.status(201).json({
-			message: 'Order placed successfully',
-			order,
-		});
-	} catch (err) {
-		res.status(500).json({ error: err.message });
+	if (!user || user.cart.length === 0) {
+		return res.status(400).json({ message: 'Cart is empty' });
 	}
+
+	// Calculate total
+	const total = items.reduce(
+		(acc, item) => acc + item.price * item.quantity,
+		0
+	);
+
+	// Create new order
+	const order = new Order({
+		user: userId,
+		items,
+		total,
+		shippingAddress,
+		billingAddress,
+		paymentMethod,
+	});
+
+	await order.save();
+
+	await user.save();
+
+	res.status(201).json({
+		message: 'Order placed successfully',
+		order,
+	});
+	// } catch (err) {
+	// 	res.status(500).json({ error: err.message });
+	// }
 };
 
 // Get all orders for a user
