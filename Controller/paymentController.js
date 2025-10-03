@@ -10,8 +10,8 @@ const { default: OrderSchema } = require('../Schemas/OrderSchema');
 const User = require('../Schemas/userSchema');
 
 // 🔑 Config (replace with your credentials)
-const clientId = 'TEST-M23QLXBFIKYTQ_25092';
-const clientSecret = 'NzVlYWE1ZjMtYzFmYS00MWJjLWFkMGQtOWYxOTA4NGRlZjRm';
+const clientId = 'SU2509231148396759558422';
+const clientSecret = 'e4d9b7bb-d236-4304-a177-d0906e244eb3';
 const clientVersion = '1.0'; // usually "1.0"
 const env = Env.SANDBOX; // change to Env.PRODUCTION for live
 
