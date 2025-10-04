@@ -14,6 +14,7 @@ const CartRoutes = require('./Routes/Cart');
 const { default: orouter } = require('./Routes/orderRouter');
 const { default: authrouter } = require('./Routes/authRouter');
 const prouter = require('./Routes/paymentRoute');
+const WishlistRouter = require('./Routes/WishlistSchema');
 
 const corsOpts = {
 	origin: '*',
@@ -35,6 +36,7 @@ app.use('/cart', CartRoutes);
 app.use('/order', orouter);
 app.use('/auth', authrouter);
 app.use('/payment', prouter);
+app.use('/wishlist', WishlistRouter);
 
 /* API ENPOINTS */
 
