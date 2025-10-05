@@ -66,6 +66,16 @@ export const getOrderById = async (req, res) => {
 	// 	res.status(500).json({ error: err.message });
 	// }
 };
+export const getAllOrders = async (req, res) => {
+	try {
+		const order = await Order.find({});
+
+		if (!order) return res.status(404).json({ message: 'Order not found' });
+		res.json(order);
+	} catch (err) {
+		res.status(500).json({ error: err.message });
+	}
+};
 
 // Update order status (Admin only usually)
 export const updateOrderStatus = async (req, res) => {

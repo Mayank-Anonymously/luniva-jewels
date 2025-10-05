@@ -4,6 +4,7 @@ import {
 	getUserOrders,
 	getOrderById,
 	updateOrderStatus,
+	getAllOrders,
 } from '../Controller/orderController.js';
 
 const orouter = express.Router();
@@ -13,6 +14,8 @@ orouter.post('/place', placeOrder);
 
 // Get all orders for a user
 orouter.get('/user/:userId', getUserOrders);
+
+orouter.get('/get-all-orders', getAllOrders);
 
 // Get single order
 orouter.get('/:orderId', getOrderById);
