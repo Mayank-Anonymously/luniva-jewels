@@ -1,3 +1,4 @@
+const Product = require('../Schemas/ProductSchema');
 const ProductSchema = require('../Schemas/ProductSchema');
 
 const AddProduct = async (req, res) => {
@@ -74,11 +75,11 @@ const GetAllProduct = async (req, res) => {
 	}
 };
 const GetProductByID = async (req, res) => {
-	const { ProductID } = req.params;
+	const { _id } = req.params;
 
 	try {
 		const GetProduct = await ProductSchema.findOne({
-			_id: ProductID,
+			_id: _id,
 		});
 		if (GetProduct) {
 			res.status(200).json({
@@ -156,10 +157,56 @@ const DeleteProductByID = async (req, res) => {
 	}
 };
 
+const AddProductToSubcategoryById = async (req, res) => {
+	try {
+		const { _id } = req.params; // Product ID to update
+		const { productName, description, price, images, categoryId } = req.body;
+
+		if (!_id) {
+			return res.status(400).json({
+				success: false,
+				message: '_id is required',
+			});
+		}
+
+		// Find product by ID
+		const product = await Product.findById(_id);
+		if (!product) {
+			return res.status(404).json({
+				success: false,
+				message: 'Product not found',
+			});
+		}
+
+		// Update fields if provided
+		if (productName) product.productName = productName;
+		if (description) product.description = description;
+		if (price) product.price = price;
+		if (images) product.images = images;
+		if (categoryId) product.categoryId = categoryId;
+
+		await product.save();
+
+		res.status(200).json({
+			success: true,
+			message: 'Product updated successfully',
+			data: product,
+		});
+	} catch (error) {
+		console.error('❌ Error updating product:', error);
+		res.status(500).json({
+			success: false,
+			message: 'Server error',
+			error: error.message,
+		});
+	}
+};
+
 module.exports = {
 	AddProduct,
 	GetAllProduct,
 	GetProductByID,
 	UpdateProduct,
 	DeleteProductByID,
+	AddProductToSubcategoryById,
 };
