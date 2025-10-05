@@ -1,34 +1,29 @@
-const mongoose = require("mongoose");
-const autoIncrement = require("mongoose-auto-increment");
-const mongooseSerial = require("mongoose-serial");
+const mongoose = require('mongoose');
+const autoIncrement = require('mongoose-auto-increment');
+const mongooseSerial = require('mongoose-serial');
 
-const CategoriesSchema = new mongoose.Schema(
-  {
-    CategoryID: String,
-    CategoryName: String,
-    CategoryDescription: String,
-    // SubCategory: [
-    //   {
-    //     subCatId: String,
-    //     subCategoryName: String,
-    //     subSubCategory: [
-    //       {
-    //         id: String,
-    //         name: String,
-    //       },
-    //     ],
-    //   },
-    // ],
-    SubCategory: [],
-    catImage: String,
-  },
-  { timestamps: true }
-);
-autoIncrement.initialize(mongoose.connection);
-CategoriesSchema.plugin(mongooseSerial, {
-  field: "CategoryID",
-  digits: 2,
+// Define SubSubCategory schema (commented out for future use)
+// const SubSubCategorySchema = new mongoose.Schema({
+// 	id: String,
+// 	name: String,
+// });
+
+// Define SubCategory schema
+const SubCategorySchema = new mongoose.Schema({
+	subCategoryName: { type: String, required: true },
+	// subSubCategory: [SubSubCategorySchema],
 });
 
-const Categories = new mongoose.model("Categories", CategoriesSchema);
+// Define main Category schema
+const CategoriesSchema = new mongoose.Schema(
+	{
+		CategoryName: { type: String, required: true },
+		CategoryDescription: String,
+		SubCategory: [SubCategorySchema],
+		catImage: String,
+	},
+	{ timestamps: true }
+);
+
+const Categories = mongoose.model('Categories', CategoriesSchema);
 module.exports = Categories;
