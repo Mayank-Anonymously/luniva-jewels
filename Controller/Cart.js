@@ -92,7 +92,7 @@ const GetAllItems = async (req, res) => {
 			});
 		}
 
-		const cartItems = await CartSchema.find({ userId });
+		const cartItems = await CartSchema.find({ userId: userId });
 
 		if (!cartItems || cartItems.length === 0) {
 			return res.status(200).json({

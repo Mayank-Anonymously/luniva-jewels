@@ -64,14 +64,13 @@ exports.initiatePayment = async (req, res) => {
 
 		await user.save();
 		const merchantOrderId = order.orderId;
-		console.log(merchantOrderId);
 
 		// Build payment request
 		const request = StandardCheckoutPayRequest.builder()
 			.merchantOrderId(merchantOrderId)
 			.amount(amount * 100) // ₹ → paise
 			.redirectUrl(
-				`http://localhost:3000/order/payment-status/${merchantOrderId}`
+				`https://lunivajewels.com/order/payment-status/${merchantOrderId}`
 			)
 
 			.build();
@@ -91,7 +90,7 @@ exports.initiatePayment = async (req, res) => {
 exports.checkPaymentStatus = async (req, res) => {
 	try {
 		const { merchantOrderId } = req.params;
-
+		console.log(merchantOrderId);
 		if (!merchantOrderId) {
 			return res.status(400).json({ message: 'merchantOrderId is required' });
 		}

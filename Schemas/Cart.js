@@ -3,6 +3,7 @@ const autoIncrement = require('mongoose-auto-increment');
 
 const CartSchema = new mongoose.Schema(
 	{
+		userId: String,
 		title: String,
 		description: String,
 		price: Number,
