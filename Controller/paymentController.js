@@ -12,8 +12,8 @@ const User = require('../Schemas/userSchema');
 // 🔑 Config (replace with your credentials)
 const clientId = 'SU2509231148396759558422';
 const clientSecret = 'e4d9b7bb-d236-4304-a177-d0906e244eb3';
-const clientVersion = '1.0'; // usually "1.0"
-const env = Env.SANDBOX; // change to Env.PRODUCTION for live
+const clientVersion = '1'; // usually "1.0"
+const env = Env.PRODUCTION; // change to Env.PRODUCTION for live
 
 // Initialize PhonePe client
 const client = StandardCheckoutClient.getInstance(
@@ -63,8 +63,8 @@ exports.initiatePayment = async (req, res) => {
 		await order.save();
 
 		await user.save();
-
 		const merchantOrderId = order.orderId;
+		console.log(merchantOrderId);
 
 		// Build payment request
 		const request = StandardCheckoutPayRequest.builder()

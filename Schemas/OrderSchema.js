@@ -1,5 +1,8 @@
-import Counter from './Counter,js';
 import mongoose from 'mongoose';
+import autoIncrement from 'mongoose-auto-increment';
+
+// Initialize autoIncrement
+autoIncrement.initialize(mongoose.connection);
 
 const addressSchema = new mongoose.Schema({
 	name: { type: String, required: true },
@@ -12,7 +15,8 @@ const addressSchema = new mongoose.Schema({
 });
 
 const orderSchema = new mongoose.Schema({
-	orderId: { type: String, unique: true }, // auto-generated sequential ID
+	orderNumber: { type: Number, unique: true }, // auto-increment numeric field
+	orderId: { type: String, unique: true }, // formatted ID
 	user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
 	items: Array,
 	total: { type: Number, required: true },
@@ -23,19 +27,21 @@ const orderSchema = new mongoose.Schema({
 	createdAt: { type: Date, default: Date.now },
 });
 
-// Pre-save hook for auto-increment orderId
-orderSchema.pre('save', async function (next) {
-	if (this.isNew) {
-		const counter = await Counter.findByIdAndUpdate(
-			{ _id: 'orderId' }, // counter document for orders
-			{ $inc: { seq: 1 } }, // increment sequence
-			{ new: true, upsert: true } // create if not exists
-		);
+// Attach auto-increment plugin
+orderSchema.plugin(autoIncrement.plugin, {
+	model: 'Order',
+	field: 'orderNumber',
+	startAt: 1,
+	incrementBy: 1,
+});
 
-		// Format with leading zeros → 00001, 00002, etc.
-		this.orderId = counter.seq.toString().padStart(5, '0');
+// Setter to automatically format orderId whenever orderNumber is set
+orderSchema.path('orderNumber').set(function (value) {
+	// Only set orderId if value exists (to avoid undefined issues)
+	if (value != null) {
+		this.orderId = value.toString().padStart(5, '0'); // 00001, 00002, ...
 	}
-	next();
+	return value;
 });
 
 export default mongoose.model('Order', orderSchema);

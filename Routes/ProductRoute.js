@@ -11,7 +11,7 @@ const router = express.Router();
 const uploadProductImage = require('../multer/ProductImages');
 router.get('/getAllProducts', GetAllProduct);
 
-router.get('/:ProductID/getProductById', GetProductByID);
+router.get('/:_id/getProductById', GetProductByID);
 
 router.post('/addProduct', uploadProductImage, AddProduct);
 
