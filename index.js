@@ -1,5 +1,6 @@
 const express = require('express');
 const app = express();
+const axios = require('axios');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const ProductRouter = require('./Routes/ProductRoute');
@@ -15,6 +16,7 @@ const { default: orouter } = require('./Routes/orderRouter');
 const { default: authrouter } = require('./Routes/authRouter');
 const prouter = require('./Routes/paymentRoute');
 const WishlistRouter = require('./Routes/WishlistSchema');
+const Product = require('./Schemas/ProductSchema');
 
 const corsOpts = {
 	origin: '*',
@@ -37,6 +39,73 @@ app.use('/order', orouter);
 app.use('/auth', authrouter);
 app.use('/payment', prouter);
 app.use('/wishlist', WishlistRouter);
+app.post('/get-check', async (req, res) => {
+	try {
+		const { jsonArray } = req.body; // assuming you send the list in body
+
+		const results = await Promise.all(
+			jsonArray.map(async (item) => {
+				return await Product.findOneAndUpdate(
+					{ image: item },
+					{ $set: { style: 'party-collection' } }
+				);
+			})
+		);
+
+		res.json({ message: 'Products updated successfully', results });
+	} catch (error) {
+		console.error(error);
+		res.status(500).json({ error: 'Something went wrong' });
+	}
+});
+
+// server.js
+
+// GET route to fetch city and state by pincode
+app.get('/api/pincode/:code', async (req, res) => {
+	const { code } = req.params;
+
+	try {
+		// Make API call to India Postal service
+		const response = await axios.get(
+			`https://api.postalpincode.in/pincode/${code}`
+		);
+
+		if (
+			response.data &&
+			response.data[0] &&
+			response.data[0].PostOffice &&
+			response.data[0].PostOffice.length > 0
+		) {
+			const detailsFound = response.data[0].PostOffice[0];
+
+			// Return required fields
+			res.json({
+				success: true,
+				message: 'Pincode details found',
+				data: {
+					city: detailsFound.District || '',
+					state: detailsFound.State || '',
+					country: detailsFound.Country || '',
+					pincode: code,
+					postOfficeName: detailsFound.Name || '',
+				},
+			});
+		} else {
+			res.status(404).json({
+				success: false,
+				message: 'Invalid pincode or no details found',
+			});
+		}
+	} catch (error) {
+		console.error('❌ Error fetching pincode details:', error.message);
+		res.status(500).json({
+			success: false,
+			message: 'Internal Server Error',
+			error: error.message,
+		});
+	}
+});
 
 /* API ENPOINTS */
 

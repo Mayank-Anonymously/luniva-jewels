@@ -17,6 +17,7 @@ const ProductSchema = new mongoose.Schema(
 		quantity: String,
 		inStock: Boolean,
 		stockQuantity: String,
+		style: String,
 	},
 	{ timestamps: true }
 );
