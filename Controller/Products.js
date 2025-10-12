@@ -210,7 +210,8 @@ const AddProductToSubcategoryById = async (req, res) => {
 		});
 	}
 };
-const autoCompleteProduct = async () => {
+
+const autoCompleteProduct = async (req, res) => {
 	const { value } = req.params;
 
 	const findValueWithProductOrcategory = await Product.find({
@@ -219,10 +220,7 @@ const autoCompleteProduct = async () => {
 			{ category: { $regex: value, $options: 'i' } }, // search in category, case-insensitive
 		],
 	});
-	console.log(
-		'findValueWithProductOrcategory:',
-		findValueWithProductOrcategory
-	);
+	res.json(findValueWithProductOrcategory);
 };
 module.exports = {
 	AddProduct,

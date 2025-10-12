@@ -16,7 +16,7 @@ router.get('/:_id/getProductById', GetProductByID);
 
 router.post('/addProduct', uploadProductImage, AddProduct);
 
-router.post('/auto-complete/:value', autoCompleteProduct);
+router.get('/auto-complete/:value', autoCompleteProduct);
 
 router.put('/RemoveWeddingPackage', DeleteProductByID);
 
