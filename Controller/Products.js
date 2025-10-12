@@ -215,9 +215,7 @@ const autoCompleteProduct = async (req, res) => {
 	const { value } = req.params;
 
 	const findValueWithProductOrcategory = await Product.find({
-		$or: [
-			{ categoryName: { $regex: value, $options: 'i' } }, // search in category, case-insensitive
-		],
+		categoryName: value.toUpperCase(),
 	});
 	res.json(findValueWithProductOrcategory);
 };
