@@ -16,41 +16,45 @@ const AddProduct = async (req, res) => {
 		stockQuantity,
 	} = req.body;
 
-	const newProduct = new ProductSchema({
-		title,
-		description,
-		price,
-		priceSale,
-		image: req.file.filename,
-		categoryId,
-		categoryName,
-		productSku,
-		productCode,
-		inStock,
-		quantity,
-		stockQuantity,
-	});
+	try {
+		// Extract all uploaded image filenames
+		const imageFilenames = req.files?.map((file) => file.filename) || [];
 
-	// try {
-	const saveNewProduct = await newProduct.save();
-	if (saveNewProduct) {
-		res.status(200).json({
-			baseResponse: { status: 1, messsage: 'Product added successfully' },
-			response: saveNewProduct,
+		const newProduct = new ProductSchema({
+			title,
+			description,
+			price,
+			priceSale,
+			image: imageFilenames, // Now an array
+			categoryId,
+			categoryName,
+			productSku,
+			productCode,
+			inStock,
+			quantity,
+			stockQuantity,
 		});
-	} else {
-		res.status(400).json({
-			baseResponse: { status: 0, messsage: 'Bad Request' },
+
+		const saveNewProduct = await newProduct.save();
+
+		if (saveNewProduct) {
+			res.status(200).json({
+				baseResponse: { status: 1, messsage: 'Product added successfully' },
+				response: saveNewProduct,
+			});
+		} else {
+			res.status(400).json({
+				baseResponse: { status: 0, messsage: 'Bad Request' },
+				response: [],
+			});
+		}
+	} catch (err) {
+		console.error(err.message);
+		res.status(500).json({
+			baseResponse: { status: 0, messsage: err.message },
 			response: [],
 		});
 	}
-	// } catch (err) {
-	//   console.log(err.message);
-	//   res.status(500).json({
-	//     baseResponse: { status: 0, messsage: err.message },
-	//     response: [],
-	//   });
-	// }
 };
 
 const GetAllProduct = async (req, res) => {
@@ -100,35 +104,40 @@ const GetProductByID = async (req, res) => {
 	}
 };
 const UpdateProduct = async (req, res) => {
-	const ProductID = req.params.ProductID;
-	const { ProductName, ProductDescription, SubProduct } = req.body;
+	const productId = req.params.ProductID;
+	const {
+		productName,
+		description,
+		price,
+		categoryId,
+		existingImages = [],
+	} = req.body;
 
 	try {
-		if (ProductID) {
-			await ProductSchema.findOneAndUpdate(
-				{ _id: ProductID },
-				{ $set: { ProductName, ProductDescription, SubProduct } }
-			);
-			res.status(200).json({
-				baseResponse: { status: 1, messsage: 'Product updated successfully' },
-				response: [],
-			});
-		} else {
-			res.status(500).json({
-				baseResponse: {
-					status: 0,
-					messsage: 'Product is not updated',
-				},
-				response: [],
-			});
-		}
-	} catch (err) {
+		const newImages = req.files?.map((file) => file.filename) || [];
+		const allImages = [...existingImages, ...newImages];
+
+		await ProductSchema.findByIdAndUpdate(productId, {
+			ProductName: productName,
+			ProductDescription: description,
+			price,
+			categoryId,
+			image: allImages, // replace or merge image array
+		});
+
+		res.status(200).json({
+			success: true,
+			message: 'Product updated successfully',
+		});
+	} catch (error) {
+		console.error(error);
 		res.status(500).json({
-			baseResponse: { status: 1, messsage: err.message },
-			response: [],
+			success: false,
+			message: 'Product update failed',
 		});
 	}
 };
+
 const DeleteProductByID = async (req, res) => {
 	const ProductID = req.params.ProductID;
 	try {
