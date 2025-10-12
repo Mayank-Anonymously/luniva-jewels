@@ -94,3 +94,32 @@ export const updateOrderStatus = async (req, res) => {
 		res.status(500).json({ error: err.message });
 	}
 };
+
+// Get all orders by user ID
+export const getOrderByUserId = async (req, res) => {
+	try {
+		const { userId } = req.params;
+
+		const orders = await Order.find({ user: userId });
+
+		if (!orders || orders.length === 0) {
+			return res.status(404).json({
+				success: false,
+				message: 'No orders found for this user.',
+			});
+		}
+
+		res.status(200).json({
+			success: true,
+			message: 'Orders fetched successfully',
+			orders,
+		});
+	} catch (err) {
+		console.error('❌ Error fetching orders:', err.message);
+		res.status(500).json({
+			success: false,
+			message: 'Internal server error',
+			error: err.message,
+		});
+	}
+};

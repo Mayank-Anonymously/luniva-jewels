@@ -5,6 +5,7 @@ import {
 	getOrderById,
 	updateOrderStatus,
 	getAllOrders,
+	getOrderByUserId,
 } from '../Controller/orderController.js';
 
 const orouter = express.Router();
@@ -22,5 +23,6 @@ orouter.get('/:orderId', getOrderById);
 
 // Update status (Pending → Shipped → Delivered → Cancelled)
 orouter.put('/:orderId/status', updateOrderStatus);
+orouter.get('/by-user/:userId', getOrderByUserId);
 
 export default orouter;

@@ -17,6 +17,8 @@ const { default: authrouter } = require('./Routes/authRouter');
 const prouter = require('./Routes/paymentRoute');
 const WishlistRouter = require('./Routes/WishlistSchema');
 const Product = require('./Schemas/ProductSchema');
+const SavedAddress = require('./Schemas/SavedAddress');
+const savedrouter = require('./Routes/SavedAddress');
 
 const corsOpts = {
 	origin: '*',
@@ -37,6 +39,7 @@ app.use('/', CateRouter);
 app.use('/cart', CartRoutes);
 app.use('/order', orouter);
 app.use('/auth', authrouter);
+app.use('/address', savedrouter);
 app.use('/payment', prouter);
 app.use('/wishlist', WishlistRouter);
 app.post('/get-check', async (req, res) => {
