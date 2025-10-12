@@ -6,6 +6,7 @@ const {
 	UpdateProduct,
 	GetProductByID,
 	AddProductToSubcategoryById,
+	autoCompleteProduct,
 } = require('../Controller/Products');
 const router = express.Router();
 const uploadProductImage = require('../multer/ProductImages');
@@ -14,6 +15,8 @@ router.get('/getAllProducts', GetAllProduct);
 router.get('/:_id/getProductById', GetProductByID);
 
 router.post('/addProduct', uploadProductImage, AddProduct);
+
+router.post('/auto-complete/:value', autoCompleteProduct);
 
 router.put('/RemoveWeddingPackage', DeleteProductByID);
 

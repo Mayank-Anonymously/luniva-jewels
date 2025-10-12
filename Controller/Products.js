@@ -201,7 +201,20 @@ const AddProductToSubcategoryById = async (req, res) => {
 		});
 	}
 };
+const autoCompleteProduct = async () => {
+	const { value } = req.params;
 
+	const findValueWithProductOrcategory = await Product.find({
+		$or: [
+			{ title: { $regex: value, $options: 'i' } }, // search in title, case-insensitive
+			{ category: { $regex: value, $options: 'i' } }, // search in category, case-insensitive
+		],
+	});
+	console.log(
+		'findValueWithProductOrcategory:',
+		findValueWithProductOrcategory
+	);
+};
 module.exports = {
 	AddProduct,
 	GetAllProduct,
@@ -209,4 +222,5 @@ module.exports = {
 	UpdateProduct,
 	DeleteProductByID,
 	AddProductToSubcategoryById,
+	autoCompleteProduct,
 };
