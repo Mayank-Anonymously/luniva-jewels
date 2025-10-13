@@ -6,7 +6,7 @@ export const placeOrder = async (req, res) => {
 	// try {
 	const { userId, shippingAddress, billingAddress, paymentMethod, items } =
 		req.body;
-	console.log(userId);
+
 	// Get user and populate cart with product details
 	const user = await User.findById(userId);
 
