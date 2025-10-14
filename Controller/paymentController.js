@@ -132,9 +132,6 @@ exports.checkPaymentStatus = async (req, res) => {
 		res.status(500).json({ error: 'Payment status check failed' });
 	}
 };
-
-// ✅ Configure Nodemailer Transporter
-
 exports.sendInvoiceMail = async (req, res) => {
 	try {
 		const { user, order } = req.body;
@@ -142,145 +139,109 @@ exports.sendInvoiceMail = async (req, res) => {
 		const itemsHTML = order.items
 			.map(
 				(item, i) => `
-          <tr>
-            <td>${i + 1}</td>
-            <td><strong>${item.title}</strong></td>
-            <td>₹${item.priceSale}</td>
-            <td>${item.quantity}</td>
-            <td>₹${item.priceSale * item.quantity}</td>
-          </tr>
-        `
+				<tr>
+					<td style="border:1px solid #ddd; padding:8px; text-align:center;">${i + 1}</td>
+					<td style="border:1px solid #ddd; padding:8px;">${item.title}</td>
+					<td style="border:1px solid #ddd; padding:8px; text-align:center;">₹${
+						item.priceSale
+					}</td>
+					<td style="border:1px solid #ddd; padding:8px; text-align:center;">${
+						item.quantity
+					}</td>
+					<td style="border:1px solid #ddd; padding:8px; text-align:center;">₹${
+						item.priceSale * item.quantity
+					}</td>
+				</tr>
+			`
 			)
 			.join('');
 
 		const html = `
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Invoice - Luniva Jewels</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
-  <style>
-    body {
-      font-family: "Helvetica Neue", Arial, sans-serif;
-      background: #f9f9f9;
-      padding: 20px;
-      color: #333;
-    }
-    .invoice-box {
-      background: #fff;
-      border-radius: 10px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      padding: 30px;
-      max-width: 800px;
-      margin: auto;
-    }
-    .brand-name {
-      font-size: 2rem;
-      font-weight: 700;
-      color: #800000;
-      letter-spacing: 1.5px;
-    }
-    .invoice-header {
-      border-bottom: 2px solid #800000;
-      padding-bottom: 10px;
-      margin-bottom: 20px;
-    }
-    .table thead {
-      background-color: #800000;
-      color: #fff;
-    }
-    .table th, .table td {
-      vertical-align: middle;
-      text-align: center;
-    }
-    .thankyou {
-      color: #800000;
-      font-weight: bold;
-      font-size: 1.3rem;
-      text-align: center;
-      margin-top: 20px;
-    }
-    footer {
-      text-align: center;
-      margin-top: 20px;
-      font-size: 13px;
-      color: #777;
-    }
-  </style>
-</head>
-<body>
-  <div class="invoice-box">
-    <div class="invoice-header d-flex justify-content-between align-items-center">
-      <div>
-        <h2 class="brand-name">LUNIVA</h2>
-        <p class="mb-0"><strong>Luniva Jewels</strong></p>
-        <small>
-          F-780, Kamla Nagar, Agra-282005<br />
-          +91 70557 01906 | +91 89232 50822<br />
-          <a href="mailto:info@lunivajewels.com" class="text-decoration-none">info@lunivajewels.com</a>
-        </small>
-      </div>
-      <div class="text-end">
-        <h5 class="text-uppercase text-danger mb-1">INVOICE #${
-					order.orderId
-				}</h5>
-        <p class="mb-0"><strong>Date:</strong> ${moment(order.createdAt).format(
-					'DD/MM/YYYY'
-				)}</p>
-      </div>
-    </div>
+		<!DOCTYPE html>
+		<html lang="en">
+		<head>
+			<meta charset="UTF-8" />
+			<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+			<title>Invoice - Luniva Jewels</title>
+		</head>
+		<body style="margin:0; padding:0; background-color:#f7f7f7; font-family:Arial, Helvetica, sans-serif; color:#333;">
+			<div style="max-width:800px; margin:20px auto; background:#fff; border-radius:8px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.1); padding:30px;">
+				
+				<!-- Header -->
+				<div style="border-bottom:2px solid #800000; padding-bottom:10px; display:flex; justify-content:space-between; flex-wrap:wrap;">
+					<div>
+						<h2 style="color:#800000; font-size:28px; font-weight:700; margin:0;">LUNIVA</h2>
+						<p style="margin:5px 0 0 0; font-weight:bold;">Luniva Jewels</p>
+						<p style="margin:0; font-size:14px; line-height:1.5;">
+							F-780, Kamla Nagar, Agra-282005<br />
+							+91 70557 01906 | +91 89232 50822<br />
+							<a href="mailto:info@lunivajewels.com" style="color:#800000; text-decoration:none;">info@lunivajewels.com</a>
+						</p>
+					</div>
+					<div style="text-align:right;">
+						<h4 style="color:#800000; margin:0;">INVOICE #${order.orderId}</h4>
+						<p style="margin:0; font-size:14px;">Date: ${moment(order.createdAt).format(
+							'DD/MM/YYYY'
+						)}</p>
+					</div>
+				</div>
 
-    <div class="mb-4">
-      <h6 class="fw-bold text-uppercase mb-1">Invoice To:</h6>
-      <p class="mb-0">${user.name}<br />
-      ${order?.shippingAddress?.street}, ${order?.shippingAddress?.city}, ${
+				<!-- Billing Info -->
+				<div style="margin-top:20px;">
+					<h4 style="margin:0 0 5px 0; color:#800000;">Invoice To:</h4>
+					<p style="margin:0; font-size:14px; line-height:1.6;">
+						<strong>${user.name}</strong><br />
+						${order?.shippingAddress?.street}, ${order?.shippingAddress?.city}, ${
 			order?.shippingAddress?.state
 		}, ${order?.shippingAddress?.zip}, India<br />
-      <a href="mailto:${user.email}">${user.email}</a></p>
-    </div>
+						<a href="mailto:${user.email}" style="color:#800000; text-decoration:none;">${
+			user.email
+		}</a>
+					</p>
+				</div>
 
-    <table class="table table-bordered align-middle">
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>Item</th>
-          <th>Price</th>
-          <th>Qty</th>
-          <th>Total</th>
-        </tr>
-      </thead>
-      <tbody>${itemsHTML}</tbody>
-    </table>
+				<!-- Items Table -->
+				<table style="width:100%; border-collapse:collapse; margin-top:20px; font-size:14px;">
+					<thead>
+						<tr style="background-color:#800000; color:#fff;">
+							<th style="border:1px solid #800000; padding:8px;">#</th>
+							<th style="border:1px solid #800000; padding:8px; text-align:left;">Item</th>
+							<th style="border:1px solid #800000; padding:8px;">Price</th>
+							<th style="border:1px solid #800000; padding:8px;">Qty</th>
+							<th style="border:1px solid #800000; padding:8px;">Total</th>
+						</tr>
+					</thead>
+					<tbody>
+						${itemsHTML}
+					</tbody>
+				</table>
 
-    <div class="row mt-4">
-      <div class="col-md-6"></div>
-      <div class="col-md-6">
-        <table class="table table-borderless">
-          <tbody>
-            <tr>
-              <td class="text-end"><strong>Subtotal:</strong></td>
-              <td class="text-end">₹${order.total}</td>
-            </tr>
-            <tr>
-              <td class="text-end"><strong>Tax:</strong></td>
-              <td class="text-end">Inclusive (GST & Shipping)</td>
-            </tr>
-            <tr>
-              <td class="text-end fw-bold"><strong>Grand Total:</strong></td>
-              <td class="text-end fw-bold text-danger">₹${order.total}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
+				<!-- Totals -->
+				<table style="width:100%; margin-top:20px; font-size:14px;">
+					<tr>
+						<td style="text-align:right; padding:5px 8px;"><strong>Subtotal:</strong></td>
+						<td style="text-align:right; padding:5px 8px;">₹${order.total}</td>
+					</tr>
+					<tr>
+						<td style="text-align:right; padding:5px 8px;"><strong>Tax:</strong></td>
+						<td style="text-align:right; padding:5px 8px;">Inclusive (GST & Shipping)</td>
+					</tr>
+					<tr>
+						<td style="text-align:right; padding:5px 8px; color:#800000; font-weight:bold;"><strong>Grand Total:</strong></td>
+						<td style="text-align:right; padding:5px 8px; color:#800000; font-weight:bold;">₹${
+							order.total
+						}</td>
+					</tr>
+				</table>
 
-    <div class="thankyou">Thank you for your purchase!</div>
-    <footer>Invoice generated automatically by Luniva Jewels.</footer>
-  </div>
-</body>
-</html>`;
+				<!-- Footer -->
+				<div style="margin-top:30px; text-align:center;">
+					<h3 style="color:#800000; font-weight:600; margin-bottom:10px;">Thank you for your purchase!</h3>
+					<p style="font-size:13px; color:#666;">Invoice generated automatically by Luniva Jewels.</p>
+				</div>
+			</div>
+		</body>
+		</html>`;
 
 		await transporter.sendMail({
 			from: `"Luniva Jewels" <${process.env.SMTP_USER}>`,
@@ -294,7 +255,7 @@ exports.sendInvoiceMail = async (req, res) => {
 			message: 'Invoice email sent successfully',
 		});
 	} catch (err) {
-		console.error('❌ Invoice email error:', err);
+		console.error(err);
 		return res.status(500).json({ success: false, message: err.message });
 	}
 };
