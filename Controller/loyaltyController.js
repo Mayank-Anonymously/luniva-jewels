@@ -1,4 +1,5 @@
 const Loyalty = require('../Schemas/LoyalityModel');
+const User = require('../Schemas/userSchema.js');
 
 // Get loyalty status
 const getLoyaltyStatus = async (req, res) => {
@@ -88,23 +89,37 @@ const claimReward = async (req, res) => {
 };
 
 const getLoyaltyUser = async (req, res) => {
-	// try {
-	const loyalty = await Loyalty.find({}); // Fetch all loyalty records
+	try {
+		// Fetch all loyalty records
+		const loyaltyRecords = await Loyalty.find();
 
-	if (!loyalty || loyalty.length === 0) {
-		return res.status(404).json({ message: 'No loyalty users found' });
+		if (!loyaltyRecords || loyaltyRecords.length === 0) {
+			return res.status(404).json({ message: 'No loyalty users found' });
+		}
+
+		// Map through loyalty records and fetch user details for each
+		const loyaltyWithUser = await Promise.all(
+			loyaltyRecords.map(async (record) => {
+				const user = await User.findById(record.userId).select(
+					'name email number'
+				);
+				return {
+					...record.toObject(),
+					...user._doc, // include user details or null if not found
+				};
+			})
+		);
+
+		res.status(200).json({
+			message: 'Loyalty users fetched successfully',
+			data: loyaltyWithUser,
+		});
+	} catch (err) {
+		console.error('Error fetching loyalty users:', err);
+		res.status(500).json({ error: 'Internal server error' });
 	}
-	console.log('loyalty:', loyalty);
-
-	res.status(200).json({
-		message: 'Loyalty users fetched successfully',
-		data: loyalty,
-	});
-	// } catch (err) {
-	// 	console.error('Error fetching loyalty users:', err);
-	// 	res.status(500).json({ error: 'Internal server error' });
-	// }
 };
+
 module.exports = {
 	getLoyaltyStatus,
 	incrementPurchase,
