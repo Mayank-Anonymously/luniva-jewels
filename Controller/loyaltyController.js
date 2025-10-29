@@ -27,55 +27,46 @@ const getLoyaltyStatus = async (req, res) => {
 
 // Increment purchase count
 const incrementPurchase = async (req, res) => {
-	const { userId, orderId } = req.body; // include orderId to avoid duplicate entries
+	const { userId, orderId } = req.params; // include orderId to avoid duplicate entries
 
-	try {
-		// Check if loyalty record exists for the user
-		let loyalty = await Loyalty.findOne({ userId });
+	// try {
+	// Check if loyalty record exists for the user
+	let loyalty = await Loyalty.findOne({ userId });
 
-		// If not found, create a new record
-		if (!loyalty) {
-			loyalty = new Loyalty({
-				userId,
-				purchaseCount: 1,
-				purchaseHistory: [orderId], // store orderId for tracking
-				rewardClaimed: false,
-			});
-			await loyalty.save();
-
-			return res.json({
-				message: 'First purchase added successfully!',
-				purchaseCount: 1,
-				eligible: false,
-			});
-		}
-
-		// Check if this order already exists (avoid duplicate increment)
-		if (loyalty.purchaseHistory.includes(orderId)) {
-			return res.json({
-				message: 'This purchase already exists!',
-				purchaseCount: loyalty.purchaseCount,
-				eligible: loyalty.purchaseCount >= 6 && !loyalty.rewardClaimed,
-			});
-		}
-
-		// Increment purchase count and update purchase history
-		loyalty.purchaseCount += 1;
-		loyalty.purchaseHistory.push(orderId);
-
+	// If not found, create a new record
+	if (!loyalty) {
+		loyalty = new Loyalty({
+			userId,
+			purchaseCount: 1,
+			purchaseHistory: [orderId], // store orderId for tracking
+			rewardClaimed: false,
+		});
 		await loyalty.save();
 
-		const eligible = loyalty.purchaseCount >= 6 && !loyalty.rewardClaimed;
-
-		res.json({
-			message: 'Purchase count updated!',
-			purchaseCount: loyalty.purchaseCount,
-			eligible,
+		return res.json({
+			message: 'First purchase added successfully!',
+			purchaseCount: 1,
+			eligible: false,
 		});
-	} catch (err) {
-		console.error('Error updating purchase count:', err);
-		res.status(500).json({ error: 'Internal server error' });
 	}
+	console.log('loyalty:', loyalty);
+
+	// Increment purchase count and update purchase history
+	loyalty.purchaseCount += 1;
+
+	await loyalty.save();
+
+	const eligible = loyalty.purchaseCount >= 6 && !loyalty.rewardClaimed;
+
+	res.json({
+		message: 'Purchase count updated!',
+		purchaseCount: loyalty.purchaseCount,
+		eligible,
+	});
+	// } catch (err) {
+	// 	console.error('Error updating purchase count:', err);
+	// 	res.status(500).json({ error: 'Internal server error' });
+	// }
 };
 
 // Claim reward
@@ -96,4 +87,27 @@ const claimReward = async (req, res) => {
 	}
 };
 
-module.exports = { getLoyaltyStatus, incrementPurchase, claimReward };
+const getLoyaltyUser = async (req, res) => {
+	// try {
+	const loyalty = await Loyalty.find({}); // Fetch all loyalty records
+
+	if (!loyalty || loyalty.length === 0) {
+		return res.status(404).json({ message: 'No loyalty users found' });
+	}
+	console.log('loyalty:', loyalty);
+
+	res.status(200).json({
+		message: 'Loyalty users fetched successfully',
+		data: loyalty,
+	});
+	// } catch (err) {
+	// 	console.error('Error fetching loyalty users:', err);
+	// 	res.status(500).json({ error: 'Internal server error' });
+	// }
+};
+module.exports = {
+	getLoyaltyStatus,
+	incrementPurchase,
+	claimReward,
+	getLoyaltyUser,
+};

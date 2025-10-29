@@ -43,19 +43,13 @@ app.use('/auth', authrouter);
 app.use('/address', savedrouter);
 app.use('/payment', prouter);
 app.use('/wishlist', WishlistRouter);
-app.use('/loyality', lrouter);
+app.use('/loyalty', lrouter);
 
 app.post('/get-check', async (req, res) => {
 	try {
-		const { jsonArray } = req.body; // assuming you send the list in body
-
-		const results = await Promise.all(
-			jsonArray.map(async (item) => {
-				return await Product.findOneAndUpdate(
-					{ image: item },
-					{ $set: { style: 'party-collection' } }
-				);
-			})
+		const results = await Product.updateMany(
+			{ categoryName: 'PENDENT' },
+			{ $set: { categoryName: 'PENDANT' } }
 		);
 
 		res.json({ message: 'Products updated successfully', results });

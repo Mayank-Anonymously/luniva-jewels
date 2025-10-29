@@ -33,6 +33,7 @@ exports.saveAddress = async (req, res) => {
 			.json({ message: 'Server error', error: error.message });
 	}
 };
+
 exports.getAddressesByUserId = async (req, res) => {
 	try {
 		const { userId } = req.params;
